@@ -12,8 +12,9 @@ class UserRepo {
 	addNewUser = async (newErrLog: NewUser) => {
 		return await this.db.insert(userSchema).values(newErrLog);
 	};
+
 	IfUserExist = async (id: number) => {
-		const result = await this.db.select({ userId: userSchema.userId }).from(userSchema).where(eq(userSchema.gitHubId, id));
+		const result = await this.db.select({ token: userSchema.userToken }).from(userSchema).where(eq(userSchema.gitHubId, id));
 		return result;
 	};
 }

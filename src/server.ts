@@ -13,8 +13,7 @@ app.use("*", cors());
 app.route("/api/err-log", errLogRouter);
 app.route("/api/login", loginRout);
 
-app.onError((err, c) => {
-	console.log("file: server.ts:15 ~ err:", err);
+app.onError(async (err, c) => {
 	return c.text("Something went wrong on the server!", 500);
 });
 
