@@ -8,29 +8,34 @@ class ErrorUtility {
 		});
 
 		worker.postMessage({ error, req, token });
-
-		worker.on("message", result => {
-			console.log("Result from worker:", result);
-		});
-
-		worker.on("error", error => {
-			console.error("Error in worker:", error);
-		});
+		try {
+			worker.on("message", result => {
+				console.log("Result from worker:", result);
+			});
+			worker.on("error", error => {
+				console.error("Error in worker:", error);
+			});
+		} finally {
+			worker.terminate();
+		}
 	}
 	async formatAxiosError(error: AxiosError<any, any>, token: string) {
 		const worker = new Worker("./workerAxiosError.js", {
 			workerData: { error, token },
 		});
+		try {
+			worker.postMessage({ error, token });
 
-		worker.postMessage({ error, token });
-
-		worker.on("message", result => {
-			console.log("Result from worker:", result);
-		});
-
-		worker.on("error", error => {
-			console.error("Error in worker:", error);
-		});
+			worker
+				.on("message", result => {
+					console.log("Result from worker:", result);
+				})
+				.on("error", error => {
+					console.error("Error in worker:", error);
+				});
+		} finally {
+			worker.terminate();
+		}
 	}
 	// async sendErrorFromHandler(error: unknown | Error, req: any, token: string) {
 	// 	try {

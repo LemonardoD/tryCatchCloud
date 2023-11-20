@@ -47,6 +47,22 @@ class ErrorLogRepo {
 			.where(and(eq(errorLogs.user, userId), gte(errorLogs.timeStamp, time)))
 			.orderBy(desc(errorLogs.timeStamp));
 	};
+
+	errorDetails = async (userId: string, errorId: string) => {
+		return await this.db
+			.select({
+				method: errorLogs.method,
+				url: errorLogs.url,
+				query: errorLogs.query,
+				params: errorLogs.params,
+				stCode: errorLogs.statusCode,
+				requestBody: errorLogs.requestBody,
+				responseBody: errorLogs.responseBody,
+				stack: errorLogs.stack,
+			})
+			.from(errorLogs)
+			.where(and(eq(errorLogs.user, userId), eq(errorLogs.errLogId, errorId)));
+	};
 }
 
 export default new ErrorLogRepo(database);

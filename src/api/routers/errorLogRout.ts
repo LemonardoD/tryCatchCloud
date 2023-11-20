@@ -63,4 +63,14 @@ errLogRouter.get("/by-time/:time", async c => {
 	});
 });
 
+errLogRouter.get("/details/:errId", async c => {
+	const errId = c.req.param("errId");
+	const userId = userIdFromJwt(c.req.header("Authorization"));
+	const errLogs = await ErrorLogRepo.errorDetails(userId, errId);
+
+	return c.json({
+		message: errLogs,
+	});
+});
+
 export default errLogRouter;
