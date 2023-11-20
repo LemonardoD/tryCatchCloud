@@ -1,11 +1,15 @@
 import { Hono } from "hono";
-import ErrorLogRepo from "../database/repositories/errorLogRepo";
 import { userIdFromJwt } from "../helpers/jwtDecode";
+import UserRepo from "../database/repositories/usersRepo";
+import ErrorLogRepo from "../database/repositories/errorLogRepo";
+import { NewErrLog } from "../database/schemas/errorLogSchema";
 
 const errLogRouter = new Hono();
 
 errLogRouter.post("/new", async c => {
-	const errData = await c.req.json();
+	let errData: NewErrLog = await c.req.json();
+	const [{ userId }] = await UserRepo.getUserId(errData.user);
+	errData.user = userId;
 	await ErrorLogRepo.addNewError(errData);
 
 	return c.json({

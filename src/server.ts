@@ -14,6 +14,7 @@ app.route("/api/err-log", errLogRouter);
 app.route("/api/login", loginRout);
 
 app.onError(async (err, c) => {
+	console.log("file: server.ts:17 ~ err:", err);
 	return c.text("Something went wrong on the server!", 500);
 });
 

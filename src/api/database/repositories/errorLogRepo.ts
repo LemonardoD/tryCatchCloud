@@ -9,6 +9,13 @@ class ErrorLogRepo {
 		this.db = database;
 	}
 
+	addNewError2 = async (newErrLog: { user: any; errorName: any; errorMessage: any }) => {
+		return await this.db.execute(sql`
+		INSERT CASE WHEN SELECT COUNT(*) FROM ${errorLogs} WHERE ${errorLogs.user}=${newErrLog.user} <32 THEN 
+				INSERT INTO  ${errorLogs} (user_id, error_tag, error_msg) VALUES (${newErrLog.user}, ${newErrLog.errorName}, ${newErrLog.errorMessage})
+			END`);
+	};
+
 	addNewError = async (newErrLog: NewErrLog) => {
 		return await this.db.insert(errorLogs).values(newErrLog);
 	};

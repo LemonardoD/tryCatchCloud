@@ -13,8 +13,27 @@ class UserRepo {
 		return await this.db.insert(userSchema).values(newErrLog);
 	};
 
-	IfUserExist = async (id: number) => {
-		const result = await this.db.select({ token: userSchema.userToken }).from(userSchema).where(eq(userSchema.gitHubId, id));
+	IfUserExist = async (gitHubId: number) => {
+		const result = await this.db
+			.select({ userId: userSchema.userId, usageToken: userSchema.userToken })
+			.from(userSchema)
+			.where(eq(userSchema.gitHubId, gitHubId));
+		return result;
+	};
+
+	getUserId = async (usageToken: string) => {
+		const result = await this.db
+			.select({ userId: userSchema.userId })
+			.from(userSchema)
+			.where(eq(userSchema.userToken, usageToken));
+		return result;
+	};
+
+	getUsageToken = async (userId: string) => {
+		const result = await this.db
+			.select({ usageToken: userSchema.userToken })
+			.from(userSchema)
+			.where(eq(userSchema.userId, userId));
 		return result;
 	};
 }

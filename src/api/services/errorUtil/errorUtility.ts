@@ -1,40 +1,65 @@
+import url from "url";
 import { AxiosError } from "axios";
 import { Worker } from "worker_threads";
+import { Request } from "express";
 
 class ErrorUtility {
-	async sendErrorFromHandler(error: unknown | Error, req: any, token: string) {
-		const worker = new Worker("./workerSendError.js", {
-			workerData: { error, req, token },
+	extractExpressSerializableReqData(req: Request) {
+		const currentUrl = new URL(req.protocol + "://" + req.get("host") + req.originalUrl);
+		const paramsArr: string[][] = [];
+		currentUrl.searchParams.forEach((elValue, elKey) => {
+			paramsArr.push([elKey, elValue]);
 		});
-
-		worker.postMessage({ error, req, token });
+		const params: object = Object.fromEntries(paramsArr);
+		return {
+			method: req.method,
+			url: req.protocol + "://" + req.get("host") + req.originalUrl,
+			body: req.body,
+			query: req.url ? url.parse(req.url, true) : null,
+			params: params,
+		};
+	}
+	async sendErrorFromHandler(error: unknown | Error, req: unknown, token: string, userContext?: object) {
 		try {
+			const serializedReq = this.extractExpressSerializableReqData(req as Request);
+			const worker = new Worker("C:/Users/MSI/VS_Projects/tryCatchCloud/src/api/services/errorUtil/workerSendError.ts", {
+				workerData: { error, serializedReq, token, userContext },
+			});
+
+			worker.postMessage({ error, serializedReq, token, userContext });
+
 			worker.on("message", result => {
 				console.log("Result from worker:", result);
+				worker.terminate();
 			});
+
 			worker.on("error", error => {
 				console.error("Error in worker:", error);
+				worker.terminate();
 			});
-		} finally {
-			worker.terminate();
+		} catch (err) {
+			console.error("Logs Have not been sended.");
 		}
 	}
-	async formatAxiosError(error: AxiosError<any, any>, token: string) {
-		const worker = new Worker("./workerAxiosError.js", {
-			workerData: { error, token },
-		});
+	async formatAxiosError(error: AxiosError<any, any>, token: string, userContext: object) {
 		try {
-			worker.postMessage({ error, token });
+			const worker = new Worker("./workerAxiosError.js", {
+				workerData: { error, token, userContext },
+			});
 
-			worker
-				.on("message", result => {
-					console.log("Result from worker:", result);
-				})
-				.on("error", error => {
-					console.error("Error in worker:", error);
-				});
-		} finally {
-			worker.terminate();
+			worker.postMessage({ error, token, userContext });
+
+			worker.on("message", result => {
+				console.log("Result from worker:", result);
+				worker.terminate();
+			});
+
+			worker.on("error", error => {
+				console.error("Error in worker:", error);
+				worker.terminate();
+			});
+		} catch (err) {
+			console.error("Logs Have not been sended.");
 		}
 	}
 	// async sendErrorFromHandler(error: unknown | Error, req: any, token: string) {

@@ -17,4 +17,5 @@ export const errorLogs = mysqlTable("error_logs", {
 	statusCode: int("statusCode"),
 	responseBody: text("responseBody"),
 	stack: text("stack"),
+	context: json("user_context"),
 });
