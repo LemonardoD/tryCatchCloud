@@ -17,7 +17,7 @@ loginRout.get("/getUserinfo", async c => {
 	const alreadyExist = await UserRepo.IfUserExist(id);
 	if (alreadyExist.length) {
 		const jwtToken = await sign({ userId: alreadyExist[0].userId, expires: jwtDate() }, JWT_SECRET);
-		return c.json({ jwtToken, token: alreadyExist[0].usageToken });
+		return c.json({ token: jwtToken });
 	}
 
 	const generatedUserId = nanoid();
@@ -34,7 +34,7 @@ loginRout.get("/getUserinfo", async c => {
 		userToken: generatedErrTokenId,
 	});
 
-	return c.json({ jwtToken, usageToken: generatedErrTokenId });
+	return c.json({ token: jwtToken, usageToken: generatedErrTokenId });
 });
 
 loginRout.get("/errToken", async c => {
