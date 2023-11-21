@@ -17,7 +17,7 @@ loginRout.get("/getUserinfo", async c => {
 	const alreadyExist = await UserRepo.IfUserExist(id);
 	if (alreadyExist.length) {
 		const jwtToken = await sign({ userId: alreadyExist[0].userId, expires: jwtDate() }, JWT_SECRET);
-		return c.json({ token: jwtToken });
+		return c.json({ status: 200, token: jwtToken });
 	}
 
 	const generatedUserId = nanoid();
@@ -34,14 +34,17 @@ loginRout.get("/getUserinfo", async c => {
 		userToken: generatedErrTokenId,
 	});
 
-	return c.json({ token: jwtToken, usageToken: generatedErrTokenId });
+	return c.json({ status: 201, token: jwtToken, usageToken: generatedErrTokenId });
 });
 
 loginRout.get("/errToken", async c => {
 	const userId = userIdFromJwt(c.req.header("Authorization"));
 
-	const [{ usageToken }] = await UserRepo.getUsageToken(userId);
-
+	const dbResp = await UserRepo.getUsageToken(userId);
+	if (!dbResp.length) {
+		c.json({ status: 403, message: "Invalid Token!" });
+	}
+	const [{ usageToken }] = dbResp;
 	return c.json({ usageToken: usageToken });
 });
 

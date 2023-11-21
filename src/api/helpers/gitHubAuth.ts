@@ -1,12 +1,13 @@
 import axios from "axios";
 import "dotenv/config";
 import { GithubData } from "../types/apiTypes";
+import { HTTPException } from "hono/http-exception";
 
 const { GITHUB_ID, GITHUB_SECRET } = <{ GITHUB_ID: string; GITHUB_SECRET: string }>process.env;
 
 export const githubAuth = async (requestToken?: string) => {
 	if (!requestToken) {
-		throw new Error("No Token granted.");
+		throw new HTTPException(401, { message: "No Token granted." });
 	}
 	try {
 		const gitHubResp = await axios({
@@ -28,6 +29,6 @@ export const githubAuth = async (requestToken?: string) => {
 		const usInfo: GithubData = gitHubUserInfo.data;
 		return usInfo;
 	} catch (err) {
-		throw new Error("Can not Get user info by this Token.");
+		throw new HTTPException(403, { message: "Can not Get user info by this Token." });
 	}
 };

@@ -1,9 +1,10 @@
 import { decode } from "hono/jwt";
 import { JwtToken } from "../types/apiTypes";
+import { HTTPException } from "hono/http-exception";
 
 export const userIdFromJwt = (token?: string) => {
 	if (!token) {
-		throw new Error("No Token was provided.");
+		throw new HTTPException(401, { message: "No Token granted." });
 	}
 	const decodedToken: JwtToken = decode(token.replace("Bearer ", ""));
 	const { userId } = decodedToken.payload;

@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { userIdFromJwt } from "../helpers/jwtDecode";
+import { NewErrLog } from "../database/schemas/errorLogSchema";
 import UserRepo from "../database/repositories/usersRepo";
 import ErrorLogRepo from "../database/repositories/errorLogRepo";
-import { NewErrLog } from "../database/schemas/errorLogSchema";
 
 const errLogRouter = new Hono();
 
@@ -12,9 +12,7 @@ errLogRouter.post("/new", async c => {
 	errData.user = userId;
 	await ErrorLogRepo.addNewError(errData);
 
-	return c.json({
-		message: "Created successfully.",
-	});
+	return c.json({ status: 201, message: "Created successfully." });
 });
 
 errLogRouter.get("/all", async c => {
@@ -26,51 +24,10 @@ errLogRouter.get("/all", async c => {
 	});
 });
 
-errLogRouter.get("/grouped", async c => {
+errLogRouter.get("/by-id/:id", async c => {
+	const errId = c.req.param("id");
 	const userId = userIdFromJwt(c.req.header("Authorization"));
-	const errLogs = await ErrorLogRepo.groupedErrors(userId);
-
-	return c.json({
-		message: errLogs,
-	});
-});
-
-errLogRouter.get("/by-tag", async c => {
-	const tag = c.req.query("tag");
-	const time = c.req.query("time");
-	const userId = userIdFromJwt(c.req.header("Authorization"));
-
-	if (!tag) {
-		throw new Error("Set query param 'tag'!");
-	}
-
-	if (!time) {
-		const errLogs = await ErrorLogRepo.errorsByTag(userId, tag);
-		return c.json({
-			message: errLogs,
-		});
-	}
-	const errLogs = await ErrorLogRepo.errorsByTaAndTime(userId, tag, new Date(time));
-
-	return c.json({
-		message: errLogs,
-	});
-});
-
-errLogRouter.get("/by-time/:time", async c => {
-	const timestamp = new Date(c.req.param("time"));
-	const userId = userIdFromJwt(c.req.header("Authorization"));
-	const errLogs = await ErrorLogRepo.allErrorsByTime(userId, timestamp);
-
-	return c.json({
-		message: errLogs,
-	});
-});
-
-errLogRouter.get("/details/:errId", async c => {
-	const errId = c.req.param("errId");
-	const userId = userIdFromJwt(c.req.header("Authorization"));
-	const errLogs = await ErrorLogRepo.errorDetails(userId, errId);
+	const errLogs = await ErrorLogRepo.errorById(userId, errId);
 
 	return c.json({
 		message: errLogs,
