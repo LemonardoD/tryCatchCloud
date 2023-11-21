@@ -16,6 +16,7 @@ class ErrorLogRepo {
 	allErrors = async (userId: string) => {
 		return await this.db
 			.select({
+				user: errorLogs.user,
 				errorLogId: errorLogs.errLogId,
 				errorMethod: errorLogs.method,
 				errorTag: errorLogs.url,

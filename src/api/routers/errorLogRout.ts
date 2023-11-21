@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { pusher } from "../helpers/pusher";
 import { userIdFromJwt } from "../helpers/jwtDecode";
 import { NewErrLog } from "../database/schemas/errorLogSchema";
 import UserRepo from "../database/repositories/usersRepo";
@@ -8,10 +9,20 @@ const errLogRouter = new Hono();
 
 errLogRouter.post("/new", async c => {
 	let errData: NewErrLog = await c.req.json();
-	const [{ userId }] = await UserRepo.getUserId(errData.user);
+	const apiKey = errData.user;
+	const [{ userId }] = await UserRepo.getUserId(apiKey);
 	errData.user = userId;
 	await ErrorLogRepo.addNewError(errData);
 
+	pusher.trigger(userId, "newError", {
+		user: errData.user,
+		errorMethod: errData.method,
+		errorLogId: errData.errLogId,
+		errorTag: errData.url,
+		errorTime: new Date(),
+		stack: errData.stack,
+		context: errData.context,
+	});
 	return c.json({ status: 201, message: "Created successfully." });
 });
 
