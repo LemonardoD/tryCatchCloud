@@ -1,48 +1,63 @@
+import "dotenv/config";
 import { Hono } from "hono";
-import { pusher } from "../helpers/pusher";
-import { userIdFromJwt } from "../helpers/jwtDecode";
+import { jwt } from "hono/jwt";
+import { zValidator } from "@hono/zod-validator";
+import { jwtDecode } from "../helpers/jwtDecode";
 import { NewErrLog } from "../database/schemas/errorLogSchema";
-import UserRepo from "../database/repositories/usersRepo";
 import ErrorLogRepo from "../database/repositories/errorLogRepo";
+import { errLogSchema } from "../helpers/zodSchemas";
 
+const { JWT_SECRET } = <{ JWT_SECRET: string }>process.env;
 const errLogRouter = new Hono();
 
-errLogRouter.post("/new", async c => {
-	let errData: NewErrLog = await c.req.json();
-	const apiKey = errData.user;
-	const [{ userId }] = await UserRepo.getUserId(apiKey);
-	errData.user = userId;
-	await ErrorLogRepo.addNewError(errData);
+errLogRouter.post(
+	"/new",
+	zValidator("json", errLogSchema, async (result, c) => {
+		if (!result.success) {
+			return c.json("Invalid data!", 400);
+		}
+		const errData: NewErrLog = await c.req.json();
+		await ErrorLogRepo.addNewError(errData);
 
-	pusher.trigger(userId, "newError", {
-		user: errData.user,
-		errorMethod: errData.method,
-		errorLogId: errData.errLogId,
-		errorTag: errData.url,
-		errorTime: new Date(),
-		stack: errData.stack,
-		context: errData.context,
-	});
-	return c.json({ status: 201, message: "Created successfully." });
-});
+		return c.json({ message: "Created successfully." }, 201);
+	})
+);
 
-errLogRouter.get("/all", async c => {
-	const userId = userIdFromJwt(c.req.header("Authorization"));
-	const errLogs = await ErrorLogRepo.allErrors(userId);
+errLogRouter.get(
+	"/all",
+	jwt({
+		secret: JWT_SECRET,
+	}),
+	async c => {
+		const apiKey = jwtDecode(c.req.header("Authorization")!);
+		const errLogs = await ErrorLogRepo.allErrors(apiKey);
 
-	return c.json({
-		message: errLogs,
-	});
-});
+		return c.json(
+			{
+				message: errLogs,
+			},
+			200
+		);
+	}
+);
 
-errLogRouter.get("/by-id/:id", async c => {
-	const errId = c.req.param("id");
-	const userId = userIdFromJwt(c.req.header("Authorization"));
-	const errLogs = await ErrorLogRepo.errorById(userId, errId);
+errLogRouter.get(
+	"/by-id/:id",
+	jwt({
+		secret: JWT_SECRET,
+	}),
+	async c => {
+		const errId = c.req.param("id");
+		const apiKey = jwtDecode(c.req.header("Authorization")!);
+		const errLogs = await ErrorLogRepo.errorById(apiKey, errId);
 
-	return c.json({
-		message: errLogs,
-	});
-});
+		return c.json(
+			{
+				message: errLogs,
+			},
+			200
+		);
+	}
+);
 
 export default errLogRouter;

@@ -8,6 +8,9 @@ dependencies:
   '@hono/node-server':
     specifier: ^1.2.3
     version: 1.2.3
+  '@hono/zod-validator':
+    specifier: ^0.1.11
+    version: 0.1.11(hono@3.10.1)(zod@3.22.4)
   '@planetscale/database':
     specifier: ^1.11.0
     version: 1.11.0
@@ -47,6 +50,9 @@ dependencies:
   typescript:
     specifier: ^5.2.2
     version: 5.2.2
+  zod:
+    specifier: ^3.22.4
+    version: 3.22.4
 
 devDependencies:
   '@flydotio/dockerfile':
@@ -551,6 +557,16 @@ packages:
   /@hono/node-server@1.2.3:
     resolution: {integrity: sha512-IH2lpqgSSLt9sIhWBE6FivFj+0RglCNYVuBT39vkumfjqjHAwQnx7KJw9WDVNlyH+AJY0N5ImZgcIbfM5xgyBw==}
     engines: {node: '>=18.14.1'}
+    dev: false
+
+  /@hono/zod-validator@0.1.11(hono@3.10.1)(zod@3.22.4):
+    resolution: {integrity: sha512-PQXeHUP0+36qpRt8yfeD7N2jbK3ETlGvSN6dMof/HwUC/APRokQRjpXZm4rrlG71Ft0aWE01+Bm4XejqPie5Uw==}
+    peerDependencies:
+      hono: '>=3.9.0'
+      zod: ^3.19.1
+    dependencies:
+      hono: 3.10.1
+      zod: 3.22.4
     dev: false
 
   /@planetscale/database@1.11.0:
@@ -1967,4 +1983,3 @@ packages:
 
   /zod@3.22.4:
     resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
-    dev: true

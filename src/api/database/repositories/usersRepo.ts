@@ -29,13 +29,13 @@ class UserRepo {
 		return result;
 	};
 
-	getUsageToken = async (userId: string) => {
-		const result = await this.db
-			.select({ usageToken: userSchema.userToken })
-			.from(userSchema)
-			.where(eq(userSchema.userId, userId));
-		return result;
-	};
+	// getUsageToken = async (userId: string) => {
+	// 	const result = await this.db
+	// 		.select({ usageToken: userSchema.userToken })
+	// 		.from(userSchema)
+	// 		.where(eq(userSchema.userId, userId));
+	// 	return result;
+	// };
 }
 
 export default new UserRepo(database);
