@@ -13,8 +13,10 @@ class ErrorLogRepo {
 		return await this.db.insert(errorLogs).values(newErrLog);
 	};
 
-	allErrors = async (apiKey: string) => {
-		return await this.db
+	twentyErrors = async (apiKey: string, offset: number) => {
+		const count = await this.db.execute(sql`SELECT COUNT(*) as count FROM ${errorLogs} WHERE ${errorLogs.user}=${apiKey}`);
+		const rowCount = count.rows[0].count;
+		const result = await this.db
 			.select({
 				user: errorLogs.user,
 				errorLogId: errorLogs.errLogId,
@@ -26,7 +28,10 @@ class ErrorLogRepo {
 			})
 			.from(errorLogs)
 			.where(eq(errorLogs.user, apiKey))
+			.limit(20)
+			.offset(offset)
 			.orderBy(desc(errorLogs.timeStamp));
+		return { result, rowCount };
 	};
 
 	errorById = async (apiKey: string, errId: string) => {

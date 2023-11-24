@@ -24,12 +24,12 @@ app.get(
 		wait: true,
 	})
 );
-app.onError(async (err, c) => {
+app.onError((err, c) => {
 	if (err instanceof HTTPException) {
 		// await ErrorUtility.sendErrorFromHandler(err, "hnge8UEC97M4n_PrwJCsN", c.req);
-		return c.json({ status: err.status, message: err.message });
+		return err.getResponse();
 	}
-	return c.json({ status: 500, message: "Something go wrong on the server." });
+	return c.text("Something go wrong on the server.", 500);
 });
 
 serve({

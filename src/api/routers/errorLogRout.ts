@@ -24,20 +24,17 @@ errLogRouter.post(
 );
 
 errLogRouter.get(
-	"/all",
+	"/page/:page",
 	jwt({
 		secret: JWT_SECRET,
 	}),
 	async c => {
+		const page = Number(c.req.param("page"));
+		const offset = page === 1 ? 0 : (page - 1) * 20;
 		const apiKey = jwtDecode(c.req.header("Authorization")!);
-		const errLogs = await ErrorLogRepo.allErrors(apiKey);
+		const errLog = await ErrorLogRepo.twentyErrors(apiKey, offset);
 
-		return c.json(
-			{
-				message: errLogs,
-			},
-			200
-		);
+		return c.json(errLog, 200);
 	}
 );
 
