@@ -6,6 +6,7 @@ export interface WorkerErrorMessage {
 	errLogId: string;
 	errorName: string;
 	errorMessage: string;
+	projectName: string;
 	url: string;
 	params: string | object;
 	query: object | string;

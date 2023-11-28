@@ -9,6 +9,6 @@ export const jwtDecode = (token: string) => {
 
 export const jwtDate = () => {
 	let date = new Date();
-	date.setFullYear(date.getFullYear() + 1);
+	date.setFullYear(date.getMonth() + 1);
 	return date;
 };

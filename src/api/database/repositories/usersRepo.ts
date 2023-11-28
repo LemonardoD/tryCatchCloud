@@ -14,28 +14,17 @@ class UserRepo {
 	};
 
 	IfUserExist = async (gitHubId: number) => {
-		const result = await this.db
-			.select({ userId: userSchema.userId, usageToken: userSchema.userToken })
-			.from(userSchema)
-			.where(eq(userSchema.gitHubId, gitHubId));
+		const result = await this.db.select({ userId: userSchema.userId }).from(userSchema).where(eq(userSchema.gitHubId, gitHubId));
 		return result;
 	};
 
-	getUserId = async (usageToken: string) => {
+	getUserApiKey = async (userId: string) => {
 		const result = await this.db
-			.select({ userId: userSchema.userId })
+			.select({ userApiKey: userSchema.userApiKey })
 			.from(userSchema)
-			.where(eq(userSchema.userToken, usageToken));
+			.where(eq(userSchema.userId, userId));
 		return result;
 	};
-
-	// getUsageToken = async (userId: string) => {
-	// 	const result = await this.db
-	// 		.select({ usageToken: userSchema.userToken })
-	// 		.from(userSchema)
-	// 		.where(eq(userSchema.userId, userId));
-	// 	return result;
-	// };
 }
 
 export default new UserRepo(database);

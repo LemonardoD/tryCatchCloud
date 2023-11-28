@@ -3,7 +3,11 @@ import { Worker } from "worker_threads";
 import { nanoid } from "nanoid";
 import { AxiosError } from "axios";
 
-class ErrorUtility {
+export class ErrorUtility {
+	projectName: string;
+	constructor(projectName: string) {
+		this.projectName = projectName;
+	}
 	async sendErrorFromHandler(
 		error: Error,
 		token: string,
@@ -14,7 +18,7 @@ class ErrorUtility {
 			const processedError = this.errParsing(error, userContext);
 			const processedReq = this.reqDataParsing(request);
 			const mergerReqAndError = { ...processedError, ...processedReq };
-			return this.startWorker({ ...mergerReqAndError, ...{ user: token } });
+			return this.startWorker({ ...mergerReqAndError, ...{ user: token }, ...{ projectName: this.projectName } });
 			// if (request) {
 			// const processedReq = this.expressReqDataParsing(request as Request);
 			// const mergerReqAndError = { ...processedError, ...processedReq };
@@ -31,7 +35,6 @@ class ErrorUtility {
 			// };
 			// return this.startWorker({ ...graphQlError, ...{ user: token } });
 		} catch (err) {
-			console.log("file: errorUtility.ts:30 ~ err:", err);
 			console.error("Logs Have not been sended.");
 		}
 	}
@@ -52,7 +55,6 @@ class ErrorUtility {
 				worker.terminate();
 			});
 		} catch (err) {
-			console.log("file: errorUtility.ts:48 ~ err:", err);
 			console.error("Worker collapse.");
 		}
 	}
@@ -109,5 +111,3 @@ class ErrorUtility {
 		};
 	}
 }
-
-export default new ErrorUtility();

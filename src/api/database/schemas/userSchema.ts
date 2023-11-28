@@ -10,5 +10,5 @@ export const userSchema = mysqlTable("users", {
 	userName: varchar("user_name", { length: 255 }),
 	userCompany: varchar("user_company", { length: 255 }),
 	userEmail: varchar("user_email", { length: 255 }),
-	userToken: varchar("user_token", { length: 255 }).notNull(),
+	userApiKey: varchar("user_api_key", { length: 255 }).notNull(),
 });

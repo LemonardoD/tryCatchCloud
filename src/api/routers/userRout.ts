@@ -16,13 +16,13 @@ userRout.get("/github-info", async c => {
 
 	const alreadyExist = await UserRepo.IfUserExist(id);
 	if (alreadyExist.length) {
-		const jwtToken = await sign({ userId: alreadyExist[0].usageToken, expires: jwtDate() }, JWT_SECRET);
+		const jwtToken = await sign({ userId: alreadyExist[0].userId, expires: jwtDate() }, JWT_SECRET);
 		return c.json({ token: jwtToken }, 200);
 	}
 
 	const generatedUserId = nanoid();
 	const generatedErrTokenId = nanoid();
-	const jwtToken = await sign({ userId: generatedErrTokenId, expires: jwtDate() }, JWT_SECRET);
+	const jwtToken = await sign({ userId: generatedUserId, expires: jwtDate() }, JWT_SECRET);
 
 	await UserRepo.addNewUser({
 		userId: generatedUserId,
@@ -31,10 +31,10 @@ userRout.get("/github-info", async c => {
 		userName: name,
 		userCompany: company,
 		userEmail: email,
-		userToken: generatedErrTokenId,
+		userApiKey: generatedErrTokenId,
 	});
 
-	return c.json({ token: jwtToken, usageToken: generatedErrTokenId }, 201);
+	return c.json({ token: jwtToken, usageToken: generatedUserId }, 201);
 });
 
 userRout.get(
@@ -43,8 +43,9 @@ userRout.get(
 		secret: JWT_SECRET,
 	}),
 	async c => {
-		const usageToken = jwtDecode(c.req.header("Authorization")!);
-		return c.json({ usageToken });
+		const userId = jwtDecode(c.req.header("Authorization")!);
+		const [{ userApiKey }] = await UserRepo.getUserApiKey(userId);
+		return c.json({ usageToken: userApiKey }, 200);
 	}
 );
 

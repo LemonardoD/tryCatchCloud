@@ -1,12 +1,13 @@
 import { InferInsertModel } from "drizzle-orm";
-import { json, text, varchar, mysqlTable, timestamp } from "drizzle-orm/mysql-core";
+import { int, json, text, varchar, mysqlTable, timestamp } from "drizzle-orm/mysql-core";
 
 export type NewErrLog = InferInsertModel<typeof errorLogs>;
 
 export const errorLogs = mysqlTable("error_logs", {
 	errLogId: varchar("log_id", { length: 255 }).notNull().primaryKey(),
 	user: varchar("user_id", { length: 255 }).notNull(),
-	errorName: varchar("error_tag", { length: 255 }).notNull(),
+	projectId: varchar("project_id", { length: 255 }).notNull(),
+	errorName: varchar("error_name", { length: 255 }).notNull(),
 	errorMessage: varchar("error_msg", { length: 255 }).notNull(),
 	timeStamp: timestamp("time_stamp", { mode: "date" }).defaultNow(),
 	method: varchar("req_method", { length: 255 }).notNull(),
