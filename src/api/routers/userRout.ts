@@ -34,7 +34,7 @@ userRout.get("/github-info", async c => {
 		userApiKey: generatedErrTokenId,
 	});
 
-	return c.json({ token: jwtToken, usageToken: generatedUserId }, 201);
+	return c.json({ token: jwtToken }, 201);
 });
 
 userRout.get(
@@ -43,7 +43,7 @@ userRout.get(
 		secret: JWT_SECRET,
 	}),
 	async c => {
-		const userId = jwtDecode(c.req.header("Authorization")!);
+		const { userId } = jwtDecode(c.req.header("Authorization")!);
 		const [{ userApiKey }] = await UserRepo.getUserApiKey(userId);
 		return c.json({ usageToken: userApiKey }, 200);
 	}

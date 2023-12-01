@@ -18,7 +18,7 @@ export class ErrorUtility {
 			const processedError = this.errParsing(error, userContext);
 			const processedReq = this.reqDataParsing(request);
 			const mergerReqAndError = { ...processedError, ...processedReq };
-			return this.startWorker({ ...mergerReqAndError, ...{ user: token }, ...{ projectName: this.projectName } });
+			return await this.startWorker({ ...mergerReqAndError, ...{ user: token }, ...{ projectName: this.projectName } });
 			// if (request) {
 			// const processedReq = this.expressReqDataParsing(request as Request);
 			// const mergerReqAndError = { ...processedError, ...processedReq };
@@ -39,7 +39,7 @@ export class ErrorUtility {
 		}
 	}
 
-	startWorker(error: any) {
+	private async startWorker(error: any) {
 		try {
 			const worker = new Worker("C:/Users/MSI/VS_Projects/tryCatchCloud/src/api/services/errorUtil/workerSendError.ts", {
 				workerData: { error },
@@ -59,7 +59,7 @@ export class ErrorUtility {
 		}
 	}
 
-	errParsing = (error: Error, context?: object) => {
+	private errParsing = (error: Error, context?: object) => {
 		if (error.name === "AxiosError") {
 			const { config, response } = error as AxiosError<any, any>;
 			const requestBody = config?.data;
@@ -91,9 +91,9 @@ export class ErrorUtility {
 		};
 	};
 
-	reqDataParsing(req: { url: string; method: string; path: string; body: object | null; query: Function | object }) {
+	private reqDataParsing(req: { url: string; method: string; path: string; body: object | null; query: Function | object }) {
 		if (typeof req.query === "function") {
-			const getQuery = Object.keys(req.query()).length ? req.body : null;
+			const getQuery = Object.keys(req.query()).length ? req.query() : null;
 			const body = req.body ? (Object.keys(req.body).length ? req.body : null) : null;
 			return {
 				method: req.method.toUpperCase(),
@@ -107,7 +107,7 @@ export class ErrorUtility {
 			method: req.method.toUpperCase(),
 			url: req.path,
 			requestBody: body,
-			query: Object.keys(req.query).length ? req.body : null,
+			query: Object.keys(req.query).length ? req.query : null,
 		};
 	}
 }

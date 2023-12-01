@@ -2,7 +2,7 @@ import { PlanetScaleDatabase } from "drizzle-orm/planetscale-serverless";
 import { database } from "../../../configs/databaseConection";
 import { NewProject, projectSchema } from "../schemas/projectSchema";
 import { userSchema } from "../schemas/userSchema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 class ProjectRepo {
 	db: PlanetScaleDatabase<Record<string, never>>;
@@ -14,9 +14,17 @@ class ProjectRepo {
 		return await this.db.insert(projectSchema).values(newProject);
 	};
 
+	IfUserProjectExist = async (userApi: string, projectName: string) => {
+		const result = await this.db
+			.select({ projectId: projectSchema.projectId })
+			.from(projectSchema)
+			.where(and(eq(projectSchema.projectName, projectName), eq(projectSchema.userApi, userApi)));
+		return result;
+	};
+
 	allProjects = async (userId: string) => {
 		const result = await this.db
-			.selectDistinct({
+			.select({
 				projectName: projectSchema.projectName,
 			})
 			.from(projectSchema)
