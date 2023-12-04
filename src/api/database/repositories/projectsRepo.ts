@@ -2,7 +2,7 @@ import { PlanetScaleDatabase } from "drizzle-orm/planetscale-serverless";
 import { database } from "../../../configs/databaseConection";
 import { NewProject, projectSchema } from "../schemas/projectSchema";
 import { userSchema } from "../schemas/userSchema";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 class ProjectRepo {
 	db: PlanetScaleDatabase<Record<string, never>>;
@@ -19,6 +19,18 @@ class ProjectRepo {
 			.select({ projectId: projectSchema.projectId })
 			.from(projectSchema)
 			.where(and(eq(projectSchema.projectName, projectName), eq(projectSchema.userApi, userApi)));
+		return result;
+	};
+
+	latestProject = async (userId: string) => {
+		const result = await this.db
+			.select({
+				projectName: projectSchema.projectName,
+			})
+			.from(projectSchema)
+			.innerJoin(userSchema, eq(userSchema.userId, userId))
+			.where(eq(projectSchema.userApi, userSchema.userApiKey))
+			.orderBy(desc(projectSchema.timeStamp));
 		return result;
 	};
 

@@ -64,23 +64,23 @@ errLogRouter.get(
 	}
 );
 
-errLogRouter.get(
-	"/by-project-and-tag",
-	jwt({
-		secret: JWT_SECRET,
-	}),
-	async c => {
-		const project = c.req.query("project");
-		const tag = c.req.query("tag");
-		if (!project || !tag) {
-			throw new HTTPException(400, { message: "Bad Request." });
-		}
-		const { userId } = jwtDecode(c.req.header("Authorization")!);
-		const errLog = await ErrorLogRepo.errorsByProjectAndTag(userId, project, tag);
+// errLogRouter.get(
+// 	"/by-project-and-tag",
+// 	jwt({
+// 		secret: JWT_SECRET,
+// 	}),
+// 	async c => {
+// 		const project = c.req.query("project");
+// 		const tag = c.req.query("tag");
+// 		if (!project || !tag) {
+// 			throw new HTTPException(400, { message: "Bad Request." });
+// 		}
+// 		const { userId } = jwtDecode(c.req.header("Authorization")!);
+// 		const errLog = await ErrorLogRepo.errorsByProjectAndTag(userId, project, tag);
 
-		return c.json(errLog, 200);
-	}
-);
+// 		return c.json(errLog, 200);
+// 	}
+// );
 
 errLogRouter.get(
 	"/by-project/:project",
@@ -90,8 +90,15 @@ errLogRouter.get(
 	async c => {
 		const project = c.req.param("project");
 		const { userId } = jwtDecode(c.req.header("Authorization")!);
+		if (project === "latest") {
+			const projectResult = await ProjectRepo.latestProject(userId);
+			if (!projectResult.length) {
+				return c.json([], 200);
+			}
+			const errLog = await ErrorLogRepo.errorsByProject(userId, projectResult[0].projectName!);
+			return c.json(errLog, 200);
+		}
 		const errLog = await ErrorLogRepo.errorsByProject(userId, project);
-
 		return c.json(errLog, 200);
 	}
 );
@@ -110,24 +117,16 @@ errLogRouter.get(
 	}
 );
 
-errLogRouter.get(
-	"/grouped",
-	jwt({
-		secret: JWT_SECRET,
-	}),
-	async c => {
-		const { userId } = jwtDecode(c.req.header("Authorization")!);
-		const errLogs = await ErrorLogRepo.groupedErrors(userId);
-		return c.json(errLogs, 200);
-	}
-);
+// errLogRouter.get(
+// 	"/grouped",
+// 	jwt({
+// 		secret: JWT_SECRET,
+// 	}),
+// 	async c => {
+// 		const { userId } = jwtDecode(c.req.header("Authorization")!);
+// 		const errLogs = await ErrorLogRepo.groupedErrors(userId);
+// 		return c.json(errLogs, 200);
+// 	}
+// );
 
-errLogRouter.get(
-	"*",
-	cache({
-		cacheName: "errorLogCache",
-		cacheControl: "public, max-age=3600, must-revalidate",
-		wait: true,
-	})
-);
 export default errLogRouter;
