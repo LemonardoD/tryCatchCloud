@@ -3,11 +3,17 @@ import { JwtToken } from "../types/apiTypes";
 import { HTTPException } from "hono/http-exception";
 
 export const jwtDecode = (token: string) => {
-	const decodedToken: JwtToken = decode(token.replace("Bearer ", ""));
-	if (new Date() > new Date(decodedToken.payload.expires)) {
-		throw new HTTPException(401, { message: "JWT expires." });
+	try {
+		const decodedToken: JwtToken = decode(token.replace("Bearer ", ""));
+		if (new Date() > new Date(decodedToken.payload.expires)) {
+			throw new HTTPException(403, { message: "JWT expires." });
+		}
+		return decodedToken.payload.userId;
+	} catch (err: unknown | Error) {
+		if (err instanceof Error) {
+			throw new HTTPException(403, { message: err.message });
+		}
 	}
-	return decodedToken.payload;
 };
 
 export const jwtDate = () => {

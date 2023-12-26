@@ -25,7 +25,7 @@ if (parentPort) {
 			await axios.post(`https://trycatchcloud.fly.dev/api/err-log/new`, error);
 			parentPort?.postMessage("Send.");
 		} catch (err) {
-			console.log("file: workerSendError.ts:28 ~ err:", err);
+			// console.log("file: workerSendError.ts:28 ~ err:", err);
 			parentPort?.postMessage("Error logs have not been send.");
 		}
 	});

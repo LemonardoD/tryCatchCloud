@@ -7,7 +7,7 @@ const { GITHUB_ID, GITHUB_SECRET } = <{ GITHUB_ID: string; GITHUB_SECRET: string
 
 export const githubAuth = async (requestToken?: string) => {
 	if (!requestToken) {
-		throw new HTTPException(401, { message: "No Token granted." });
+		throw new HTTPException(401, { message: "No GitHub Token granted." });
 	}
 	try {
 		const gitHubResp = await axios({

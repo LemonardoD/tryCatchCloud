@@ -17,6 +17,11 @@ app.use("*", cors());
 app.route("/err-log", errLogRouter);
 app.route("/user", userRout);
 app.route("/projects", projectsRout);
+
+app.notFound(c => {
+	return c.text("Wrong route or method.", 404);
+});
+
 app.get(
 	"*",
 	cache({
@@ -25,6 +30,7 @@ app.get(
 		wait: true,
 	})
 );
+
 app.onError((err, c) => {
 	console.log("file: server.ts:28 ~ err:", err);
 	if (err instanceof HTTPException) {
